@@ -88,6 +88,7 @@ namespace AnimeSorter
                 {
                     folderName = episodeName.Substring(episodeName.LastIndexOf(']') + 2);
                     folderName = folderName.Remove(folderName.LastIndexOf('-') - 1);
+                    Console.WriteLine("Creating " + folderName + " folder...");
                     Directory.CreateDirectory(AnimeFolder + "\\" + folderName);
                 }
             }
@@ -106,6 +107,7 @@ namespace AnimeSorter
                     continue;
                 }
 
+                Console.WriteLine("Moving " + episodeName + " to " + hasFolder(episodeName) + "...");
                 Directory.Move(AnimeFolder + "\\" + episodeName, AnimeFolder + "\\" + hasFolder(episodeName) + "\\" + episodeName);
             }
         }
@@ -129,10 +131,11 @@ namespace AnimeSorter
 
                     var episodeNewName = episodeName.Substring(episodeName.LastIndexOf(']') + 2);
                     episodeNewName = episodeNewName.Remove(episodeNewName.LastIndexOf('-') - 1);
-                    var episodeNumber = episodeName.Substring(episodeName.LastIndexOf('-') + 2, 2);
-                    var episodeExtension = episodeName.Substring(episodeName.LastIndexOf('.'));
+                    episodeNewName += " " + episodeName.Substring(episodeName.LastIndexOf('-') + 2, 2);
+                    episodeNewName += episodeName.Substring(episodeName.LastIndexOf('.'));
 
-                    Directory.Move(folder + "\\" + episodeName, folder + "\\" + episodeNewName + " " + episodeNumber + episodeExtension);
+                    Console.WriteLine("Renaming " + episodeName + " to " + episodeNewName + "...");
+                    Directory.Move(folder + "\\" + episodeName, folder + "\\" + episodeNewName);
                 }
             }
         }
