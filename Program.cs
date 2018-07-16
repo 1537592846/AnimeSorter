@@ -62,8 +62,10 @@ namespace AnimeSorter
 
                     if (entry == "Y")
                     {
+                        Console.WriteLine("What is the name of this anime?: ");
+                        var folderNewName = Console.ReadLine();
                         Console.WriteLine("Moving " + folderName + " to the Anime folder");
-                        Directory.Move(DownloadedFolder + "\\" + folderName, AnimeFolder + "\\" + folderName);
+                        Directory.Move(DownloadedFolder + "\\" + folderName, AnimeFolder + "\\" + folderNewName);
                     }
                 }
             }
