@@ -1,0 +1,7 @@
+C:\Source Tree\AnimeSorter\AnimeSorter\bin\Debug\AnimeSorter.exe.config
+C:\Source Tree\AnimeSorter\AnimeSorter\bin\Debug\AnimeSorter.exe
+C:\Source Tree\AnimeSorter\AnimeSorter\bin\Debug\AnimeSorter.pdb
+C:\Source Tree\AnimeSorter\AnimeSorter\obj\Debug\AnimeSorter.csprojAssemblyReference.cache
+C:\Source Tree\AnimeSorter\AnimeSorter\obj\Debug\AnimeSorter.csproj.CoreCompileInputs.cache
+C:\Source Tree\AnimeSorter\AnimeSorter\obj\Debug\AnimeSorter.exe
+C:\Source Tree\AnimeSorter\AnimeSorter\obj\Debug\AnimeSorter.pdb
