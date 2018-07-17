@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -131,12 +132,23 @@ namespace AnimeSorter
                         continue;
                     }
 
-                    var episodeNewName = episodeName.Substring(episodeName.LastIndexOf(']') + 2);
-                    episodeNewName = episodeNewName.Remove(episodeNewName.LastIndexOf('-') - 1);
-                    episodeNewName += " " + episodeName.Substring(episodeName.LastIndexOf('-') + 2, 2);
-                    episodeNewName += episodeName.Substring(episodeName.LastIndexOf('.'));
+                    string episodeNewName = Directory.GetParent(episode).FullName;
+                    episodeNewName = episodeNewName.Substring(episodeNewName.LastIndexOf("\\") + 1);
+                    episodeNewName += " " + getEpisodeNumber(episodeName);
+                    episodeNewName += episodeName.Substring(episodeName.LastIndexOf("."));
+
+                    if (episodeName == episodeNewName)
+                    {
+                        continue;
+                    }
 
                     Console.WriteLine("Renaming " + episodeName + " to " + episodeNewName + "...");
+
+                    if (File.Exists(folder + "\\" + episodeNewName))
+                    {
+                        episodeNewName = DateTime.Now.Ticks + "-" + episodeNewName;
+                    }
+
                     Directory.Move(folder + "\\" + episodeName, folder + "\\" + episodeNewName);
                 }
             }
@@ -155,6 +167,34 @@ namespace AnimeSorter
                 }
             }
 
+            return "";
+        }
+
+        static string getEpisodeNumber(string episodeName)
+        {
+            var numbers = new List<string>();
+            var start = -1;
+            for (int i = 0; i < episodeName.Length; i++)
+            {
+                if (start < 0 && Char.IsDigit(episodeName[i]))
+                {
+                    start = i;
+                }
+                else if (start >= 0 && !Char.IsDigit(episodeName[i]))
+                {
+                    numbers.Add(episodeName.Substring(start, i - start));
+                    start = -1;
+                }
+            }
+            if (start >= 0)
+                numbers.Add(episodeName.Substring(start, episodeName.Length - start));
+            foreach (var number in numbers)
+            {
+                if (number.StartsWith("0"))
+                {
+                    return number;
+                }
+            }
             return "";
         }
     }
