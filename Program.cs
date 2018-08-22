@@ -214,6 +214,12 @@ namespace AnimeSorter
                 return regex.Match(episodeName).Groups[2].ToString();
             }
 
+            if (episodeName.Contains("[DeadFish]"))
+            {
+                regex = new Regex(@"(\[DeadFish\] )(.*)( -.*)");
+                return regex.Match(episodeName).Groups[2].ToString();
+            }
+
             Console.WriteLine("Episode from different source, update regex info.");
             Console.WriteLine(episodeName);
             return "";
