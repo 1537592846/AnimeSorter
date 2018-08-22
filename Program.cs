@@ -8,7 +8,8 @@ namespace AnimeSorter
 {
     class Program
     {
-        public static string AnimeFolder = Directory.GetCurrentDirectory();
+        //public static string AnimeFolder = Directory.GetCurrentDirectory();
+        public static string AnimeFolder = @"C:\Users\770688\Specials\Test Space\Anime";
         public static string DownloadedFolder = AnimeFolder.Remove(AnimeFolder.LastIndexOf('\\'));
 
         static void Main(string[] args)
@@ -53,7 +54,7 @@ namespace AnimeSorter
                 if (folderName.Contains("["))
                 {
                     string entry;
-                    Console.WriteLine("Is " + folderName + " a anime folder? [Y,N]: ");
+                    Console.WriteLine("Is " + folderName + " an anime folder? [Y,N]: ");
 
                     do
                     {
@@ -85,12 +86,17 @@ namespace AnimeSorter
                     continue;
                 }
 
-                string folderName = hasFolder(episodeName);
+                string animeName = getAnimeName(episodeName);
+                if (animeName == "")
+                {
+                    continue;
+                }
+
+                string folderName = hasFolder(animeName);
 
                 if (folderName == "")
                 {
-                    folderName = episodeName.Substring(episodeName.LastIndexOf(']') + 2);
-                    folderName = folderName.Remove(folderName.LastIndexOf('-') - 1);
+                    folderName = animeName;
                     Console.WriteLine("Creating " + folderName + " folder...");
                     Directory.CreateDirectory(AnimeFolder + "\\" + folderName);
                 }
@@ -110,8 +116,8 @@ namespace AnimeSorter
                     continue;
                 }
 
-                Console.WriteLine("Moving " + episodeName + " to " + hasFolder(episodeName) + "...");
-                Directory.Move(AnimeFolder + "\\" + episodeName, AnimeFolder + "\\" + hasFolder(episodeName) + "\\" + episodeName);
+                Console.WriteLine("Moving " + episodeName + " to " + getAnimeName(episodeName) + "...");
+                Directory.Move(AnimeFolder + "\\" + episodeName, AnimeFolder + "\\" + getAnimeName(episodeName) + "\\" + episodeName);
             }
         }
 
@@ -154,14 +160,14 @@ namespace AnimeSorter
             }
         }
 
-        static string hasFolder(string episodeName)
+        static string hasFolder(string animeName)
         {
             var listFolders = Directory.EnumerateDirectories(AnimeFolder).ToList();
 
             foreach (var folder in listFolders)
             {
                 var folderName = folder.Substring(folder.LastIndexOf('\\') + 1);
-                if (episodeName.Contains(folderName))
+                if (animeName == folderName)
                 {
                     return folderName;
                 }
@@ -195,6 +201,21 @@ namespace AnimeSorter
                     return number;
                 }
             }
+            return "";
+        }
+
+        static string getAnimeName(string episodeName)
+        {
+            Regex regex = null;
+
+            if (episodeName.Contains("[HorribleSubs]"))
+            {
+                regex = new Regex(@"(\[HorribleSubs\] )(.*)( -.*)");
+                return regex.Match(episodeName).Groups[2].ToString();
+            }
+
+            Console.WriteLine("Episode from different source, update regex info.");
+            Console.WriteLine(episodeName);
             return "";
         }
     }
