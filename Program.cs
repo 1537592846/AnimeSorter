@@ -8,37 +8,85 @@ namespace AnimeSorter
 {
     class Program
     {
-        //public static string AnimeFolder = Directory.GetCurrentDirectory();
-        public static string AnimeFolder = @"C:\Users\770688\Specials\Test Space\Anime";
+        public static string AnimeFolder = Directory.GetCurrentDirectory();
+        //public static string AnimeFolder = @"C:\Users\770688\Specials\Test Space\Anime";
         public static string DownloadedFolder = AnimeFolder.Remove(AnimeFolder.LastIndexOf('\\'));
 
         static void Main(string[] args)
         {
-            Console.WriteLine("Moving Episodes...");
-            MoveEpisodes();
-            Console.WriteLine("Moving Folders...");
-            MoveFolders();
-            Console.WriteLine("Creating new folders...");
-            CreateNewAnimeFolders();
-            Console.WriteLine("Moving Episodes to Folders...");
-            MoveEpisodesToFolders();
-            Console.WriteLine("Renaming Episodes...");
-            RenameEpisodes();
+            try
+            {
+                Console.WriteLine("Moving Episodes...");
+                MoveEpisodes();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Error moving episodes");
+                Console.WriteLine(e.Message);
+                Console.Read();
+            }
+
+            try
+            {
+                Console.WriteLine("Moving Folders...");
+                MoveFolders();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Error moving folders");
+                Console.WriteLine(e.Message);
+                Console.Read();
+            }
+
+            try
+            {
+                Console.WriteLine("Creating new folders...");
+                CreateNewAnimeFolders();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Error creating new folders");
+                Console.WriteLine(e.Message);
+                Console.Read();
+            }
+
+            try
+            {
+                Console.WriteLine("Moving Episodes to Folders...");
+                MoveEpisodesToFolders();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Error moving episodes to folders");
+                Console.WriteLine(e.Message);
+                Console.Read();
+            }
+
+            try
+            {
+                Console.WriteLine("Renaming Episodes...");
+                RenameEpisodes();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Error renaming episodes");
+                Console.WriteLine(e.Message);
+                Console.Read();
+            }
             Console.WriteLine("Ending...");
         }
 
         static void MoveEpisodes()
         {
             var listEpisodes = Directory.EnumerateFiles(DownloadedFolder).ToList();
-            var regex = new Regex("[0-9]");
 
             foreach (var episode in listEpisodes)
             {
                 var episodeName = episode.Substring(episode.LastIndexOf('\\') + 1);
-                if (regex.IsMatch(episodeName) && episodeName.Contains("[") && (episodeName.Contains(".mkv") || episodeName.Contains(".avi") || episodeName.Contains(".mp4")))
+                if (episodeName.Contains("[") && (episodeName.Contains(".mkv") || episodeName.Contains(".avi") || episodeName.Contains(".mp4")))
                 {
                     Console.WriteLine("Moving " + episodeName.Remove(episodeName.LastIndexOf('.')) + " to the Anime folder");
-                    Directory.Move(DownloadedFolder + "\\" + episodeName, AnimeFolder + "\\" + episodeName);
+                    MoveFile(DownloadedFolder + "\\" + episodeName, AnimeFolder + "\\" + episodeName);
                 }
             }
         }
@@ -67,7 +115,7 @@ namespace AnimeSorter
                         Console.WriteLine("What is the name of this anime?: ");
                         var folderNewName = Console.ReadLine();
                         Console.WriteLine("Moving " + folderName + " to the Anime folder");
-                        Directory.Move(DownloadedFolder + "\\" + folderName, AnimeFolder + "\\" + folderNewName);
+                        MoveFolder(DownloadedFolder + "\\" + folderName, AnimeFolder + "\\" + folderNewName);
                     }
                 }
             }
@@ -117,7 +165,7 @@ namespace AnimeSorter
                 }
 
                 Console.WriteLine("Moving " + episodeName + " to " + getAnimeName(episodeName) + "...");
-                Directory.Move(AnimeFolder + "\\" + episodeName, AnimeFolder + "\\" + getAnimeName(episodeName) + "\\" + episodeName);
+                MoveFile(AnimeFolder + "\\" + episodeName, AnimeFolder + "\\" + getAnimeName(episodeName) + "\\" + episodeName);
             }
         }
 
@@ -155,7 +203,7 @@ namespace AnimeSorter
                         episodeNewName = DateTime.Now.Ticks + "-" + episodeNewName;
                     }
 
-                    Directory.Move(folder + "\\" + episodeName, folder + "\\" + episodeNewName);
+                    MoveFile(folder + "\\" + episodeName, folder + "\\" + episodeNewName);
                 }
             }
         }
@@ -223,6 +271,46 @@ namespace AnimeSorter
             Console.WriteLine("Episode from different source, update regex info.");
             Console.WriteLine(episodeName);
             return "";
+        }
+
+        static void MoveFile(string file,string newFile)
+        {
+            try
+            {
+                Directory.Move(file,newFile);
+            }
+            catch (Exception ioe)
+            {
+                if (!ioe.Message.Contains("already exists"))
+                {
+                    return;
+                }
+
+                var fileToMove = new DirectoryInfo(file);
+                var fileOnFolder = new DirectoryInfo(newFile);
+                if (!DirectoryInfo.Equals(fileToMove, fileOnFolder))
+                {
+                    if (fileToMove.CreationTime > fileOnFolder.CreationTime)
+                    {
+                        Directory.Delete(newFile);
+                        MoveFile(file, newFile);
+                    }
+                    else
+                    {
+                        Directory.Delete(file);
+                    }
+                }
+            }
+        }
+
+        static void MoveFolder(string folder, string newFolder)
+        {
+            try
+            {
+                Directory.Move(folder, newFolder);
+            }
+            catch
+            { }
         }
     }
 }
