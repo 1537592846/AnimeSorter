@@ -93,7 +93,7 @@ namespace AnimeSorter
                 if (originalName.Contains("[") && (format == "mkv" || format == "avi" || format == "mp4"))
                 {
                     Console.WriteLine("Moving " + originalName + " to the Anime folder");
-                    MoveFile(DownloadedFolder + "\\" + originalName, AnimeFolder + "\\" + animeName + " " + episodeNumber + "." + format);
+                    MoveFile(DownloadedFolder + "\\" + originalName, AnimeFolder + "\\" + animeName + "\\" + animeName + " " + episodeNumber + "." + format);
                 }
             }
         }
@@ -249,7 +249,7 @@ namespace AnimeSorter
             }
             catch (Exception ioe)
             {
-                if (!ioe.Message.Contains("already exists"))
+                if (!ioe.Message.Contains("existe"))
                 {
                     return;
                 }
@@ -260,12 +260,12 @@ namespace AnimeSorter
                 {
                     if (fileToMove.CreationTime > fileOnFolder.CreationTime)
                     {
-                        Directory.Delete(newFile);
+                        File.Delete(newFile);
                         MoveFile(file, newFile);
                     }
                     else
                     {
-                        Directory.Delete(file);
+                        File.Delete(file);
                     }
                 }
             }
