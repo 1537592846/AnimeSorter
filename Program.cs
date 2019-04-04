@@ -8,8 +8,8 @@ namespace AnimeSorter
 {
     class Program
     {
-        //public static string AnimeFolder = Directory.GetCurrentDirectory();
-        public static string AnimeFolder = @"C:\Users\andre\Downloads\Downloaded\Animes";
+        public static string AnimeFolder = Directory.GetCurrentDirectory();
+        //public static string AnimeFolder = @"C:\Users\andre\Downloads\Downloaded\Animes";
         public static string DownloadedFolder = AnimeFolder.Remove(AnimeFolder.LastIndexOf('\\'));
 
         static void Main(string[] args)
