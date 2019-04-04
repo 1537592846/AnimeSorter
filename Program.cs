@@ -40,18 +40,6 @@ namespace AnimeSorter
 
             try
             {
-                Console.WriteLine("Creating new folders...");
-                CreateNewAnimeFolders();
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine("Error creating new folders");
-                Console.WriteLine(e.Message);
-                Console.Read();
-            }
-
-            try
-            {
                 Console.WriteLine("Moving Episodes to Folders...");
                 MoveEpisodesToFolders();
             }
@@ -124,37 +112,6 @@ namespace AnimeSorter
                         Console.WriteLine("Moving " + folderName + " to the Anime folder");
                         MoveFolder(DownloadedFolder + "\\" + folderName, AnimeFolder + "\\" + folderNewName);
                     }
-                }
-            }
-        }
-
-        static void CreateNewAnimeFolders()
-        {
-            var listEpisodes = Directory.EnumerateFiles(AnimeFolder).ToList();
-
-            foreach (var episode in listEpisodes)
-            {
-                var reg = getRegex(episode);
-                if (reg == null) continue;
-                var originalName = reg.Match(episode).Groups[0].ToString();
-                var animeName = reg.Match(episode).Groups[1].ToString();
-                var episodeNumber = reg.Match(episode).Groups[2].ToString();
-                var format = reg.Match(episode).Groups[3].ToString();
-
-                if (format != "mkv" && format != "avi" && format != "mp4")
-                {
-                    continue;
-                }
-
-                if (animeName == "")
-                {
-                    return;
-                }
-
-                if (animeName == "")
-                {
-                    Console.WriteLine("Creating " + animeName + " folder...");
-                    Directory.CreateDirectory(AnimeFolder + "\\" + animeName);
                 }
             }
         }
