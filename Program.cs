@@ -245,6 +245,10 @@ namespace AnimeSorter
         {
             try
             {
+                if (Directory.Exists(newFile.Remove(file.LastIndexOf("\\"))))
+                {
+                    Directory.CreateDirectory(newFile.Remove(newFile.LastIndexOf("\\")));
+                }
                 Directory.Move(file, newFile);
             }
             catch (Exception ioe)
