@@ -8,8 +8,8 @@ namespace AnimeSorter
 {
     class Program
     {
-        public static string AnimeFolder = Directory.GetCurrentDirectory();
-        //public static string AnimeFolder = @"C:\Users\770688\Specials\Test Space\Anime";
+        //public static string AnimeFolder = Directory.GetCurrentDirectory();
+        public static string AnimeFolder = @"C:\Users\andre\Downloads\Downloaded\Animes";
         public static string DownloadedFolder = AnimeFolder.Remove(AnimeFolder.LastIndexOf('\\'));
 
         static void Main(string[] args)
@@ -82,11 +82,18 @@ namespace AnimeSorter
 
             foreach (var episode in listEpisodes)
             {
-                var episodeName = episode.Substring(episode.LastIndexOf('\\') + 1);
-                if (episodeName.Contains("[") && (episodeName.Contains(".mkv") || episodeName.Contains(".avi") || episodeName.Contains(".mp4")))
+                var file = episode.Substring(episode.LastIndexOf("\\") + 1);
+                var reg = getRegex(file);
+                if (reg == null) continue;
+                var originalName = reg.Match(file).Groups[0].ToString();
+                var animeName = reg.Match(file).Groups[1].ToString();
+                var episodeNumber = reg.Match(file).Groups[2].ToString();
+                var format = reg.Match(file).Groups[3].ToString();
+
+                if (originalName.Contains("[") && (format == "mkv" || format == "avi" || format == "mp4"))
                 {
-                    Console.WriteLine("Moving " + episodeName.Remove(episodeName.LastIndexOf('.')) + " to the Anime folder");
-                    MoveFile(DownloadedFolder + "\\" + episodeName, AnimeFolder + "\\" + episodeName);
+                    Console.WriteLine("Moving " + originalName + " to the Anime folder");
+                    MoveFile(DownloadedFolder + "\\" + originalName, AnimeFolder + "\\" + animeName + " " + episodeNumber + "." + format);
                 }
             }
         }
@@ -127,26 +134,27 @@ namespace AnimeSorter
 
             foreach (var episode in listEpisodes)
             {
-                var episodeName = episode.Substring(episode.LastIndexOf('\\') + 1);
+                var reg = getRegex(episode);
+                if (reg == null) continue;
+                var originalName = reg.Match(episode).Groups[0].ToString();
+                var animeName = reg.Match(episode).Groups[1].ToString();
+                var episodeNumber = reg.Match(episode).Groups[2].ToString();
+                var format = reg.Match(episode).Groups[3].ToString();
 
-                if (!episode.Contains(".mkv") && !episode.Contains("mp4") && !episode.Contains("avi"))
+                if (format != "mkv" && format != "avi" && format != "mp4")
                 {
                     continue;
                 }
 
-                string animeName = getAnimeName(episodeName);
                 if (animeName == "")
                 {
-                    continue;
+                    return;
                 }
 
-                string folderName = hasFolder(animeName);
-
-                if (folderName == "")
+                if (animeName == "")
                 {
-                    folderName = animeName;
-                    Console.WriteLine("Creating " + folderName + " folder...");
-                    Directory.CreateDirectory(AnimeFolder + "\\" + folderName);
+                    Console.WriteLine("Creating " + animeName + " folder...");
+                    Directory.CreateDirectory(AnimeFolder + "\\" + animeName);
                 }
             }
         }
@@ -157,15 +165,25 @@ namespace AnimeSorter
 
             foreach (var episode in listEpisodes)
             {
-                var episodeName = episode.Substring(episode.LastIndexOf('\\') + 1);
-
-                if (!episode.Contains(".mkv") && !episode.Contains("mp4") && !episode.Contains("avi"))
+                try
                 {
-                    continue;
-                }
+                    var file = episode.Substring(episode.LastIndexOf("\\") + 1);
+                    var reg = getRegex(file);
+                    if (reg == null) continue;
+                    var originalName = reg.Match(file).Groups[0].ToString();
+                    var animeName = reg.Match(file).Groups[1].ToString();
+                    var episodeNumber = reg.Match(file).Groups[2].ToString();
+                    var format = reg.Match(file).Groups[3].ToString();
 
-                Console.WriteLine("Moving " + episodeName + " to " + getAnimeName(episodeName) + "...");
-                MoveFile(AnimeFolder + "\\" + episodeName, AnimeFolder + "\\" + getAnimeName(episodeName) + "\\" + episodeName);
+                    if (format != "mkv" && format != "avi" && format != "mp4")
+                    {
+                        continue;
+                    }
+
+                    Console.WriteLine("Moving " + originalName + " to " + animeName + "...");
+                    MoveFile(AnimeFolder + "\\" + originalName, AnimeFolder + "\\" + animeName + "\\" + animeName + " " + episodeNumber + "." + format);
+                }
+                catch { }
             }
         }
 
@@ -179,105 +197,55 @@ namespace AnimeSorter
 
                 foreach (var episode in listEpisodes)
                 {
-                    var episodeName = episode.Substring(episode.LastIndexOf('\\') + 1);
+                    var file=episode.Substring(episode.LastIndexOf("\\")+1);
+                    var reg = getRegex(file);
+                    if (reg == null) continue;
+                    var originalName = reg.Match(file).Groups[0].ToString();
+                    var animeName = reg.Match(file).Groups[1].ToString();
+                    var episodeNumber = reg.Match(file).Groups[2].ToString();
+                    var format = reg.Match(file).Groups[3].ToString();
+                    var episodeNewName = animeName + " " + episodeNumber + "." + format;
 
-                    if (!episode.Contains(".mkv") && !episode.Contains("mp4") && !episode.Contains("avi"))
+                    if (format != "mkv" && format != "avi" && format != "mp4")
                     {
                         continue;
                     }
 
-                    string episodeNewName = Directory.GetParent(episode).FullName;
-                    episodeNewName = episodeNewName.Substring(episodeNewName.LastIndexOf("\\") + 1);
-                    episodeNewName += " " + getEpisodeNumber(episodeName);
-                    episodeNewName += episodeName.Substring(episodeName.LastIndexOf("."));
-
-                    if (episodeName == episodeNewName)
-                    {
-                        continue;
-                    }
-
-                    Console.WriteLine("Renaming " + episodeName + " to " + episodeNewName + "...");
-
-                    if (File.Exists(folder + "\\" + episodeNewName))
-                    {
-                        episodeNewName = DateTime.Now.Ticks + "-" + episodeNewName;
-                    }
-
-                    MoveFile(folder + "\\" + episodeName, folder + "\\" + episodeNewName);
+                    Console.WriteLine("Renaming " + originalName + " to " + episodeNewName + "...");
+                    MoveFile(folder + "\\" + originalName, folder + "\\" + episodeNewName);
                 }
             }
         }
 
-        static string hasFolder(string animeName)
+        static Regex getRegex(string episodeName)
         {
-            var listFolders = Directory.EnumerateDirectories(AnimeFolder).ToList();
-
-            foreach (var folder in listFolders)
+            var reg = new Regex(@"([\s\S]*) (\d*)\.([\s\S]*)");
+            if (reg.IsMatch(episodeName))
             {
-                var folderName = folder.Substring(folder.LastIndexOf('\\') + 1);
-                if (animeName == folderName)
-                {
-                    return folderName;
-                }
+                return reg;
             }
-
-            return "";
-        }
-
-        static string getEpisodeNumber(string episodeName)
-        {
-            var numbers = new List<string>();
-            var start = -1;
-            for (int i = 0; i < episodeName.Length; i++)
-            {
-                if (start < 0 && Char.IsDigit(episodeName[i]))
-                {
-                    start = i;
-                }
-                else if (start >= 0 && !Char.IsDigit(episodeName[i]))
-                {
-                    numbers.Add(episodeName.Substring(start, i - start));
-                    start = -1;
-                }
-            }
-            if (start >= 0)
-                numbers.Add(episodeName.Substring(start, episodeName.Length - start));
-            foreach (var number in numbers)
-            {
-                if (number.StartsWith("0"))
-                {
-                    return number;
-                }
-            }
-            return "";
-        }
-
-        static string getAnimeName(string episodeName)
-        {
-            Regex regex = null;
 
             if (episodeName.Contains("[HorribleSubs]"))
             {
-                regex = new Regex(@"(\[HorribleSubs\] )(.*)( -.*)");
-                return regex.Match(episodeName).Groups[2].ToString();
+                return new Regex(@"\[HorribleSubs\] ([\s\S]*) - (\d*)[\s\S]*\.([\s\S]*)");
             }
 
             if (episodeName.Contains("[DeadFish]"))
             {
-                regex = new Regex(@"(\[DeadFish\] )(.*)( -.*)");
-                return regex.Match(episodeName).Groups[2].ToString();
+                return new Regex(@"\[DeadFish\] ([\s\S]*) - (\d*)[\s\S]*\.([\s\S]*)");
             }
 
             Console.WriteLine("Episode from different source, update regex info.");
             Console.WriteLine(episodeName);
-            return "";
+            Console.Read();
+            return null;
         }
 
-        static void MoveFile(string file,string newFile)
+        static void MoveFile(string file, string newFile)
         {
             try
             {
-                Directory.Move(file,newFile);
+                Directory.Move(file, newFile);
             }
             catch (Exception ioe)
             {
