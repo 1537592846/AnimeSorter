@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -9,11 +10,26 @@ namespace AnimeSorter
     class Program
     {
         public static string AnimeFolder = Directory.GetCurrentDirectory();
-        //public static string AnimeFolder = @"C:\Users\andre\Downloads\Downloaded\Animes";
         public static string DownloadedFolder = AnimeFolder.Remove(AnimeFolder.LastIndexOf('\\'));
+        public static List<string> RegexConfigs = new List<string>();
 
-        static void Main(string[] args)
+        static void Main()
         {
+            if (Debugger.IsAttached)
+                AnimeFolder = @"C:\Users\andre\Downloads\Downloaded\Animes";
+
+            try
+            {
+                Console.WriteLine("Getting regex configs...");
+                GetRegexConfigs();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Error getting regex configs");
+                Console.WriteLine(e.Message);
+                Console.Read();
+            }
+
             try
             {
                 Console.WriteLine("Moving Episodes...");
@@ -64,21 +80,43 @@ namespace AnimeSorter
             Console.WriteLine("Ending...");
         }
 
+        static void GetRegexConfigs()
+        {
+            var regexConfigPath= Path.Combine(AnimeFolder, "regexConfig.animeSorter");
+            if (!File.Exists(regexConfigPath))
+            {
+                var regexFile=File.Create(regexConfigPath);
+                var regexStreamWriter = new StreamWriter(regexFile);
+                regexStreamWriter.WriteLine(@"([\s\S]*) (\d*)\.([\s\S]*)");
+                regexStreamWriter.Close();
+                regexFile.Close();
+            }
+
+            var regexStreamReader = new StreamReader(regexConfigPath);
+            var regexConfig = regexStreamReader.ReadLine();
+            while (!string.IsNullOrEmpty(regexConfig))
+            {
+                RegexConfigs.Add(regexConfig);
+                regexConfig = regexStreamReader.ReadLine();
+            }
+        }
+
         static void MoveEpisodes()
         {
-            var listEpisodes = Directory.EnumerateFiles(DownloadedFolder).ToList();
+            var listEpisodes = Directory.EnumerateFiles(DownloadedFolder).Where(x=>!x.Contains(".animeSorter")&&!x.Contains(".exe")).ToList();
 
             foreach (var episode in listEpisodes)
             {
                 var file = episode.Substring(episode.LastIndexOf("\\") + 1);
                 var reg = getRegex(file);
-                if (reg == null) continue;
+                if (reg == null)
+                    continue;
                 var originalName = reg.Match(file).Groups[0].ToString();
                 var animeName = reg.Match(file).Groups[1].ToString();
                 var episodeNumber = reg.Match(file).Groups[2].ToString();
                 var format = reg.Match(file).Groups[3].ToString();
 
-                if (originalName.Contains("[") && (format == "mkv" || format == "avi" || format == "mp4"))
+                if (originalName.Contains("[") && (format == "mkv" && format == "avi" && format == "mp4"))
                 {
                     Console.WriteLine("Moving " + originalName + " to the Anime folder");
                     MoveFile(DownloadedFolder + "\\" + originalName, AnimeFolder + "\\" + animeName + "\\" + animeName + " " + episodeNumber + "." + format);
@@ -88,7 +126,7 @@ namespace AnimeSorter
 
         static void MoveFolders()
         {
-            var listFolders = Directory.EnumerateDirectories(DownloadedFolder).ToList();
+            var listFolders = Directory.EnumerateDirectories(DownloadedFolder).Where(x=>!x.Contains(".animeSorter")&&!x.Contains(".exe")).ToList();
 
             foreach (var folder in listFolders)
             {
@@ -118,7 +156,7 @@ namespace AnimeSorter
 
         static void MoveEpisodesToFolders()
         {
-            var listEpisodes = Directory.EnumerateFiles(AnimeFolder).ToList();
+            var listEpisodes = Directory.EnumerateFiles(AnimeFolder).Where(x=>!x.Contains(".animeSorter")&&!x.Contains(".exe")).ToList();
 
             foreach (var episode in listEpisodes)
             {
@@ -126,7 +164,8 @@ namespace AnimeSorter
                 {
                     var file = episode.Substring(episode.LastIndexOf("\\") + 1);
                     var reg = getRegex(file);
-                    if (reg == null) continue;
+                    if (reg == null)
+                        continue;
                     var originalName = reg.Match(file).Groups[0].ToString();
                     var animeName = reg.Match(file).Groups[1].ToString();
                     var episodeNumber = reg.Match(file).Groups[2].ToString();
@@ -146,17 +185,18 @@ namespace AnimeSorter
 
         static void RenameEpisodes()
         {
-            var listFolders = Directory.EnumerateDirectories(AnimeFolder).ToList();
+            var listFolders = Directory.EnumerateDirectories(AnimeFolder).Where(x=>!x.Contains(".animeSorter")&&!x.Contains(".exe")).ToList();
 
             foreach (var folder in listFolders)
             {
-                var listEpisodes = Directory.EnumerateFiles(folder).ToList();
+                var listEpisodes = Directory.EnumerateFiles(folder).Where(x=>!x.Contains(".animeSorter")&&!x.Contains(".exe")).ToList();
 
                 foreach (var episode in listEpisodes)
                 {
-                    var file=episode.Substring(episode.LastIndexOf("\\")+1);
+                    var file = episode.Substring(episode.LastIndexOf("\\") + 1);
                     var reg = getRegex(file);
-                    if (reg == null) continue;
+                    if (reg == null)
+                        continue;
                     var originalName = reg.Match(file).Groups[0].ToString();
                     var animeName = reg.Match(file).Groups[1].ToString();
                     var episodeNumber = reg.Match(file).Groups[2].ToString();
@@ -176,20 +216,13 @@ namespace AnimeSorter
 
         static Regex getRegex(string episodeName)
         {
-            var reg = new Regex(@"([\s\S]*) (\d*)\.([\s\S]*)");
-            if (reg.IsMatch(episodeName))
+            foreach (var regexInfo in RegexConfigs)
             {
-                return reg;
-            }
-
-            if (episodeName.Contains("[HorribleSubs]"))
-            {
-                return new Regex(@"\[HorribleSubs\] ([\s\S]*) - (\d*)[\s\S]*\.([\s\S]*)");
-            }
-
-            if (episodeName.Contains("[DeadFish]"))
-            {
-                return new Regex(@"\[DeadFish\] ([\s\S]*) - (\d*)[\s\S]*\.([\s\S]*)");
+                var reg = new Regex(regexInfo.Replace("\\\\","\\"));
+                if (reg.IsMatch(episodeName))
+                {
+                    return reg;
+                }
             }
 
             Console.WriteLine("Episode from different source, update regex info.");

@@ -12,3 +12,9 @@ C:\Projetos\AnimeSorter\obj\Debug\AnimeSorter.csprojAssemblyReference.cache
 C:\Projetos\AnimeSorter\obj\Debug\AnimeSorter.csproj.CoreCompileInputs.cache
 C:\Projetos\AnimeSorter\obj\Debug\AnimeSorter.exe
 C:\Projetos\AnimeSorter\obj\Debug\AnimeSorter.pdb
+D:\Projetos\AnimeSorter\bin\Debug\AnimeSorter.exe.config
+D:\Projetos\AnimeSorter\bin\Debug\AnimeSorter.exe
+D:\Projetos\AnimeSorter\bin\Debug\AnimeSorter.pdb
+D:\Projetos\AnimeSorter\obj\Debug\AnimeSorter.csproj.CoreCompileInputs.cache
+D:\Projetos\AnimeSorter\obj\Debug\AnimeSorter.exe
+D:\Projetos\AnimeSorter\obj\Debug\AnimeSorter.pdb
